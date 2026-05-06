@@ -1,0 +1,4 @@
+Machine learning lets systems learn from data.
+Supervised learning uses labeled data.
+Unsupervised learning finds patterns.
+Overfitting happens when model memorizes training data.

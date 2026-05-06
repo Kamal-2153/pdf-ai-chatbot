@@ -1,0 +1,4 @@
+Python is a high-level programming language.
+Python uses indentation.
+Python supports OOP.
+Python is used in AI, web, automation.
