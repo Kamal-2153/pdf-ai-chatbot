@@ -59,7 +59,7 @@ if st.button("Get Answer"):
         documents = loader.load()
 
         # Split text
-        from langchain_text_splitter import RecursiveCharacterTextSplitter
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
 
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
