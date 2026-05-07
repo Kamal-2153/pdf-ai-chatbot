@@ -45,9 +45,67 @@ uploaded_file = st.file_uploader("Upload PDF", type="pdf")
 question = st.text_input("Ask Question")
 
 if st.button("Get Answer"):
+
     if uploaded_file and question:
+
+        # Save uploaded PDF temporarily
+        with open("temp.pdf", "wb") as f:
+            f.write(uploaded_file.read())
+
+        # Load PDF
+        from langchain_community.document_loaders import PyPDFLoader
+
+        loader = PyPDFLoader("temp.pdf")
+        documents = loader.load()
+
+        # Split text
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200
+        )
+
+        docs = splitter.split_documents(documents)
+
+        # Embeddings
+        from langchain_huggingface import HuggingFaceEmbeddings
+
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        )
+
+        # ChromaDB
+        from langchain_community.vectorstores import Chroma
+
+        vectorstore = Chroma.from_documents(
+            docs,
+            embeddings
+        )
+
+        retriever = vectorstore.as_retriever()
+
+        # Retrieve relevant docs
+        results = retriever.invoke(question)
+
+        context = "\n".join([doc.page_content for doc in results])
+
+        # Prompt
+        prompt = f"""
+Answer only using this context:
+
+{context}
+
+Question: {question}
+"""
+
+        # LLM Response
+        response = llm.invoke(prompt)
+
         st.success("Answer generated successfully!")
-        st.write("This is where your AI answer will appear.")
+
+        st.write(response.content)
+
     else:
         st.warning("Please upload file and ask question.")
 
