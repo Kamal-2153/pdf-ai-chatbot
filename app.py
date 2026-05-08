@@ -73,8 +73,8 @@ if st.button("Get Answer"):
         from langchain_text_splitters import RecursiveCharacterTextSplitter
 
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200
+            chunk_size=800,
+            chunk_overlap=250
         )
 
         docs = splitter.split_documents(documents)
@@ -94,21 +94,33 @@ if st.button("Get Answer"):
             embeddings
         )
 
-        retriever = vectorstore.as_retriever()
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
         # Retrieve relevant docs
         results = retriever.invoke(question)
 
         context = "\n".join([doc.page_content for doc in results])
+        
+        st.write("### Retrieved Context")
+        st.write(context)
 
-        # Prompt
         prompt = f"""
-Answer only using this context:
+        You are a strict PDF question-answering assistant.
 
-{context}
+        Use ONLY the context below.
+        Do not use outside knowledge.
+        Do not guess.
+        If the answer is not in the context, say:
+        "I could not find this information in the uploaded PDF."
 
-Question: {question}
-"""
+        Context:
+        {context}
+
+        Question:
+        {question}
+
+        Answer:
+        """
 
         # LLM Response
         response = llm.invoke(prompt)
